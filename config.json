@@ -1,0 +1,15 @@
+{
+    "file_paths": [
+        "path//to//your//first//excel//file.xlsx",
+        "path//to//your//second//excel//file.xlsx"
+    ],
+    "table_names": [
+        "your_first_table_name",
+        "your_second_table_name"
+    ],
+    "table_map": {
+        "ExcelValue1": 1,
+        "ExcelValue2": 2
+    },
+    "secure_connection_string": "your_encrypted_connection_string_here"
+}

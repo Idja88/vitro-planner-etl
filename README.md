@@ -21,8 +21,8 @@
 ```json
 {
     "file_paths": [
-        "path/to/your/first/excel/file.xlsx",
-        "path/to/your/second/excel/file.xlsx"
+        "path//to//your//first//excel//file.xlsx",
+        "path//to//your//second//excel//file.xlsx"
     ],
     "table_names": [
         "your_first_table_name",
