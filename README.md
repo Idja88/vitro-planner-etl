@@ -39,6 +39,21 @@
 
 3. Установите переменную окружения ENCRYPTION_KEY с ключом шифрования для строки подключения к базе данных.
 
+4. Создайте в БД соответствующие таблицы со следующей структурой:
+
+```
+CREATE TABLE [dbo].[your_first_table_name](
+	[Num] [int] NULL,
+	[Date] [datetime] NULL,
+	[Value] [decimal](10, 4) NULL
+) ON [PRIMARY]
+
+CREATE TABLE [dbo].[your_second_table_name](
+	[Num] [int] NULL,
+	[Date] [datetime] NULL,
+	[Value] [decimal](10, 4) NULL
+) ON [PRIMARY]
+```
 ## Использование
 ### Вариант 1: Использование с установленным интерпретатором Python
 
