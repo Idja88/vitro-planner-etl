@@ -30,7 +30,7 @@ def update_db(cursor, df, table):
         if check_if_num_exists(cursor, row['Num'], row['Date'], table):
             update_row(cursor, row['Num'], row['Date'], row['Value'], table)
         else:
-            tmp_df = tmp_df.append(row)        
+            tmp_df = pd.concat([tmp_df, row.to_frame().T], axis=0, ignore_index=True)      
     return tmp_df
 
 def insert_into_table(cursor, Num, Date, Value, Table):
