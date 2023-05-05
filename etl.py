@@ -6,8 +6,15 @@ import pyodbc
 import pandas as pd
 import sqlalchemy as sa
 from cryptography.fernet import Fernet
+from datetime import date
 
 #Functions
+def delete_from_table(cursor, table):
+    date = date.today()
+    query = f"DELETE FROM {table} WHERE Date>=CONVERT(date,'{date}')"
+    cursor.execute(query)
+    cursor.commit()
+
 def check_if_num_exists(cursor, Num, Date, Table):
     query = f"SELECT Num FROM {Table} WHERE Num={Num} and Date=CONVERT(date,'{Date}')"
     cursor.execute(query)
@@ -19,13 +26,11 @@ def update_row(cursor, Num, Date, Value, Table):
 
 def update_db(cursor, df, table):
     tmp_df = pd.DataFrame(columns=['Num', 'Date', 'Value'])
-
     for i, row in df.iterrows():
         if check_if_num_exists(cursor, row['Num'], row['Date'], table):
             update_row(cursor, row['Num'], row['Date'], row['Value'], table)
         else:
-            tmp_df = tmp_df.append(row)
-            
+            tmp_df = tmp_df.append(row)        
     return tmp_df
 
 def insert_into_table(cursor, Num, Date, Value, Table):
@@ -57,6 +62,8 @@ def connect_to_db(secure_connection_string):
 def main(cursor, file_paths, database_names, table_map):
     for (file_path, database_name) in zip(file_paths, database_names):
 
+        delete_from_table(cursor, database_name)
+
         sheet_to_df = pd.read_excel(file_path, sheet_name=None)
 
         for sheet in sheet_to_df.keys():
@@ -79,8 +86,7 @@ if __name__ == "__main__":
     config_path = os.path.join(os.getcwd(), 'config.json')
     #считываем настройки
     with open(config_path, "r", encoding="utf-8") as config_file:
-        config = json.load(config_file)
-        
+        config = json.load(config_file)      
         file_paths = config['file_paths']
         table_names = config['table_names']
         table_map = config['table_map']
