@@ -43,12 +43,14 @@
 
 ```
 CREATE TABLE [dbo].[your_first_table_name](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
 	[Num] [int] NULL,
 	[Date] [datetime] NULL,
 	[Value] [decimal](10, 4) NULL
 ) ON [PRIMARY]
 
 CREATE TABLE [dbo].[your_second_table_name](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
 	[Num] [int] NULL,
 	[Date] [datetime] NULL,
 	[Value] [decimal](10, 4) NULL
