@@ -7,6 +7,9 @@ import pandas as pd
 import sqlalchemy as sa
 from cryptography.fernet import Fernet
 from datetime import date
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 #Functions
 def delete_from_table(cursor, table):
@@ -58,6 +61,22 @@ def connect_to_db(secure_connection_string):
     connection = engine.raw_connection()
     return connection
 
+def send_email(subject, message, from_email, to_email, smtp_server, smtp_port):
+    msg = MIMEMultipart()
+    msg['From'] = from_email
+    msg['To'] = to_email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(message, 'plain'))
+    
+    try:
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.sendmail(from_email, to_email, msg.as_string())
+        print("Email sent successfully")
+    except Exception as e:
+        print("Error sending email:", str(e))
+    finally:
+        server.quit()
+
 #MAIN
 def main(cursor, file_paths, database_names, table_map):
     for (file_path, database_name) in zip(file_paths, database_names):
@@ -91,11 +110,18 @@ if __name__ == "__main__":
         table_names = config['table_names']
         table_map = config['table_map']
         secure_connection_string = config['secure_connection_string']
+        from_email = config['mail_message']['from_email']
+        to_email = config['mail_message']['to_email']
+        smtp_server = config['mail_message']['smtp_server']
+        smtp_port = config['mail_message']['smtp_port']
 
     connection = connect_to_db(secure_connection_string)
     cursor = connection.cursor()
 
     try:
         main(cursor, file_paths, table_names, table_map)
+    except Exception as e:
+        error_message = f"An error occurred: {str(e)}"
+        send_email("Error in ETL process", error_message, from_email, to_email, smtp_server, smtp_port)
     finally:
         connection.close()

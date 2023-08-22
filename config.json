@@ -11,5 +11,11 @@
         "ExcelValue1": 1,
         "ExcelValue2": 2
     },
-    "secure_connection_string": "your_encrypted_connection_string_here"
+    "secure_connection_string": "your_encrypted_connection_string_here",
+    "mail_message": {
+        "from_email": "your@mail.com",
+        "to_email": "your@mail.com",
+        "smtp_server": "mail.server.com",
+        "smtp_port": 25
+    }
 }
