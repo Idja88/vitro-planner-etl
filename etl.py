@@ -123,5 +123,6 @@ if __name__ == "__main__":
     except Exception as e:
         error_message = f"An error occurred: {str(e)}"
         send_email("Error in ETL process", error_message, from_email, to_email, smtp_server, smtp_port)
+        raise SystemExit(1)
     finally:
         connection.close()
