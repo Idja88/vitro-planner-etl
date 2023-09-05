@@ -61,17 +61,16 @@ def connect_to_db(secure_connection_string):
     connection = engine.raw_connection()
     return connection
 
-def send_email(subject, message, from_email, to_email, smtp_server, smtp_port):
-    msg = MIMEMultipart()
-    msg['From'] = from_email
-    msg['To'] = to_email
-    msg['Subject'] = subject
-    msg.attach(MIMEText(message, 'plain'))
-    
+def send_email(subject, message, from_email, to_emails, smtp_server, smtp_port):
     try:
         server = smtplib.SMTP(smtp_server, smtp_port)
-        server.sendmail(from_email, to_email, msg.as_string())
-        print("Email sent successfully")
+        for to_email in to_emails:
+            msg = MIMEMultipart()
+            msg['From'] = from_email
+            msg['To'] = to_email
+            msg['Subject'] = subject
+            msg.attach(MIMEText(message, 'plain'))
+            server.send_message(msg)
     except Exception as e:
         print("Error sending email:", str(e))
     finally:
@@ -111,7 +110,7 @@ if __name__ == "__main__":
         table_map = config['table_map']
         secure_connection_string = config['secure_connection_string']
         from_email = config['mail_message']['from_email']
-        to_email = config['mail_message']['to_email']
+        to_emails = config['mail_message']['to_emails']
         smtp_server = config['mail_message']['smtp_server']
         smtp_port = config['mail_message']['smtp_port']
 
@@ -122,7 +121,7 @@ if __name__ == "__main__":
         main(cursor, file_paths, table_names, table_map)
     except Exception as e:
         error_message = f"An error occurred: {str(e)}"
-        send_email("Error in ETL process", error_message, from_email, to_email, smtp_server, smtp_port)
+        send_email("Error in ETL process", error_message, from_email, to_emails, smtp_server, smtp_port)
         raise SystemExit(1)
     finally:
         connection.close()
