@@ -6,13 +6,11 @@
 
 ## Зависимости
 
-Для запуска проекта убедитесь, что у вас установлены следующие библиотеки:
+Все зависимости указаны в файле `pyproject.toml`. Для установки зависимостей выполните следующую команду:
 
-- pandas
-- openpyxl
-- pyodbc
-- psycopg2
-- sqlalchemy
+```
+uv sync
+```
 
 ## Настройка
 
@@ -47,6 +45,7 @@
 
 3. Создайте в БД соответствующие таблицы со следующей структурой:
 
+Для MS SQL Server:
 ```sql
 CREATE TABLE [dbo].[your_first_table_name](
 	[ID] [int] IDENTITY(1,1) NOT NULL,
@@ -54,7 +53,8 @@ CREATE TABLE [dbo].[your_first_table_name](
 	[Date] [datetime] NULL,
 	[Value] [decimal](10, 4) NULL
 ) ON [PRIMARY]
-
+```
+```sql
 CREATE TABLE [dbo].[your_second_table_name](
 	[ID] [int] IDENTITY(1,1) NOT NULL,
 	[Num] [int] NULL,
@@ -62,13 +62,34 @@ CREATE TABLE [dbo].[your_second_table_name](
 	[Value] [decimal](10, 4) NULL
 ) ON [PRIMARY]
 ```
+
+Для PostgreSQL:
+```sql
+CREATE TABLE "public"."your_first_table_name" (
+    id serial4 NOT NULL,
+    num int4 NULL, 
+    "date" date NULL, 
+    value numeric(10, 4) NULL, 
+    CONSTRAINT "your_first_table_name_pkey" PRIMARY KEY (id)
+    );
+```
+```sql
+CREATE TABLE "public"."your_second_table_name" (
+    id serial4 NOT NULL,
+    num int4 NULL, 
+    "date" date NULL, 
+    value numeric(10, 4) NULL, 
+    CONSTRAINT "your_second_table_name_pkey" PRIMARY KEY (id)
+    );
+```
+
 ## Использование
 ### Вариант 1: Использование с установленным интерпретатором Python
 
 Запустите `main.py` для выполнения ETL-процесса:
 
 ```
-python main.py
+uv run main.py
 ```
 
 ### Вариант 2: Использование с компиляцией в .exe-файл
@@ -92,11 +113,3 @@ pyinstaller --onedir --add-data "config.json;." main.py
 
 ## Автоматический запуск
 Можно настроить автоматический запуск скрипта через Windows Task Scheduler (для Windows) или Cron (для Linux).
-
-### Windows Task Scheduler
-1. Откройте "Планировщик заданий" (нажмите Win и введите "Планировщик заданий" в поисковой строке).
-2. В правой части окна выберите "Создать задачу".
-3. Задайте имя и описание для вашей задачи на вкладке "Общие".
-4. Перейдите на вкладку "Триггеры" и нажмите "Новый", чтобы создать новый триггер. Установите параметры запуска по расписанию.
-5. Перейдите на вкладку "Действия" и нажмите "Новый", чтобы создать новое действие. В поле "Программа или скрипт" укажите путь к интерпретатору Python (например, C:\Python39\python.exe) или к скомпилированному исполняемому файлу (например, C:\path\to\dist\main\main.exe). В поле "Аргументы" укажите имя Python-файла (только для интерпретатора Python, например, C:\path\to\main.py).
-6. Нажмите "ОК" для сохранения задачи. Скрипт будет автоматически запускаться по заданному расписанию.
