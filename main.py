@@ -12,26 +12,27 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 #Functions
-def delete_from_table(cursor, table):
+def delete_from_table(connection, cursor, table):
     today = date.today()
     query = f"DELETE FROM {table} WHERE Date >= CAST('{today}' AS DATE)"
     cursor.execute(query)
-    cursor.commit()
+    connection.commit()
 
 def check_if_num_exists(cursor, Num, Date, Table):
     query = f"SELECT Num FROM {Table} WHERE Num = {Num} and Date = CAST('{Date}' AS DATE)"
     cursor.execute(query)
     return cursor.fetchone() is not None
 
-def update_row(cursor, Num, Date, Value, Table):
+def update_row(connection, cursor, Num, Date, Value, Table):
     query = f"UPDATE {Table} SET Value = {Value} WHERE Num = {Num} and Date = CAST('{Date}' AS DATE)"
     cursor.execute(query)
+    connection.commit()
 
-def update_db(cursor, df, table):
+def update_db(connection, cursor, df, table):
     tmp_df = pd.DataFrame(columns=['Num', 'Date', 'Value'])
     for i, row in df.iterrows():
         if check_if_num_exists(cursor, row['Num'], row['Date'], table):
-            update_row(cursor, row['Num'], row['Date'], row['Value'], table)
+            update_row(connection, cursor, row['Num'], row['Date'], row['Value'], table)
         else:
             tmp_df = pd.concat([tmp_df, row.to_frame().T], axis=0, ignore_index=True)      
     return tmp_df
@@ -40,9 +41,10 @@ def insert_into_table(cursor, Num, Date, Value, Table):
     query = f"INSERT INTO {Table} (Num, Date, Value) VALUES('{Num}', '{Date}', '{Value}')"
     cursor.execute(query)
 
-def append_from_df_to_db(cursor, df, Table):
+def append_from_df_to_db(connection, cursor, df, Table):
     for i, row in df.iterrows():
         insert_into_table(cursor, row['Num'], row['Date'], row['Value'], Table)
+    connection.commit()
 
 def resolve_path(path):
     if getattr(sys, "frozen", False):
@@ -71,11 +73,11 @@ def connect_to_db(connection_string: str):
     # Определяем тип БД на основе driver в строке подключения
     if "PostgreSQL" in driver:
         connection_uri = f"postgresql+psycopg2://{user}:{password_encoded}@{host}:{port if port else 5432}/{database}"
-        engine = sa.create_engine(connection_uri, echo=True)
+        engine = sa.create_engine(connection_uri)
         
     elif "SQL Server" in driver:
         connection_uri = f"mssql+pyodbc://{user}:{password_encoded}@{host}:{port if port else 1433}/{database}?driver={quote(driver)}"
-        engine = sa.create_engine(connection_uri, echo=True, fast_executemany=True)
+        engine = sa.create_engine(connection_uri, fast_executemany=True)
     
     else:
         raise ValueError(f"Unknown database driver: {driver}")
@@ -101,10 +103,10 @@ def send_email(subject, message, from_email, to_emails, smtp_server, smtp_port, 
         server.quit()
 
 #MAIN
-def main(cursor, file_paths, database_names, table_map):
-    for (file_path, database_name) in zip(file_paths, database_names):
+def main(connection, cursor, file_paths, table_names, table_map):
+    for (file_path, database_name) in zip(file_paths, table_names):
 
-        delete_from_table(cursor, database_name)
+        delete_from_table(connection, cursor, database_name)
 
         sheet_to_df = pd.read_excel(file_path, sheet_name=None)
 
@@ -118,9 +120,9 @@ def main(cursor, file_paths, database_names, table_map):
             #Транспонируем значения датафрейма
             df = df.melt(id_vars=["Num"],var_name="Date",value_name="Value")
             #Мэппинг значений
-            df["Value"] = df["Value"].map(table_map).fillna(0, downcast='infer') 
-            df_to_app = update_db(cursor, df, database_name)
-            append_from_df_to_db(cursor, df_to_app, database_name)
+            df["Value"] = df["Value"].map(table_map).fillna(0).astype(int)
+            df_to_app = update_db(connection, cursor, df, database_name)
+            append_from_df_to_db(connection, cursor, df_to_app, database_name)
 
         cursor.commit()
 
@@ -144,7 +146,7 @@ if __name__ == "__main__":
     cursor = connection.cursor()
 
     try:
-        main(cursor, file_paths, table_names, table_map)
+        main(connection, cursor, file_paths, table_names, table_map)
     except Exception as e:
         error_message = f"An error occurred: {str(e)}"
         send_email("Error in ETL process", error_message, from_email, to_emails, smtp_server, smtp_port, smtp_login, smtp_password)
