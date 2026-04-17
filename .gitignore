@@ -1,1 +1,4 @@
 config.json
+.python-version
+.venv
+uv.lock
