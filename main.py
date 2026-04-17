@@ -83,9 +83,11 @@ def connect_to_db(connection_string: str):
     connection = engine.raw_connection()
     return connection
 
-def send_email(subject, message, from_email, to_emails, smtp_server, smtp_port):
+def send_email(subject, message, from_email, to_emails, smtp_server, smtp_port, smtp_login, smtp_password):
     try:
         server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(smtp_login, smtp_password)
         for to_email in to_emails:
             msg = MIMEMultipart()
             msg['From'] = from_email
@@ -135,6 +137,8 @@ if __name__ == "__main__":
         to_emails = config['mail_message']['to_emails']
         smtp_server = config['mail_message']['smtp_server']
         smtp_port = config['mail_message']['smtp_port']
+        smtp_login = config['mail_message']['smtp_login']
+        smtp_password = config['mail_message']['smtp_password']
 
     connection = connect_to_db(connection_string)
     cursor = connection.cursor()
