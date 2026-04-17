@@ -4,6 +4,7 @@ import json
 from urllib.parse import quote
 import pyodbc
 import psycopg2
+from datetime import date
 import pandas as pd
 import sqlalchemy as sa
 import smtplib
@@ -13,17 +14,17 @@ from email.mime.multipart import MIMEMultipart
 #Functions
 def delete_from_table(cursor, table):
     date = date.today()
-    query = f"DELETE FROM {table} WHERE Date>=CONVERT(date,'{date}')"
+    query = f"DELETE FROM {table} WHERE Date >= CAST('{date}' AS DATE)"
     cursor.execute(query)
     cursor.commit()
 
 def check_if_num_exists(cursor, Num, Date, Table):
-    query = f"SELECT Num FROM {Table} WHERE Num={Num} and Date=CONVERT(date,'{Date}')"
+    query = f"SELECT Num FROM {Table} WHERE Num = {Num} and Date = CAST('{Date}' AS DATE)"
     cursor.execute(query)
     return cursor.fetchone() is not None
 
 def update_row(cursor, Num, Date, Value, Table):
-    query = f"UPDATE {Table} SET Value={Value} WHERE Num={Num} and Date=CONVERT(date,'{Date}')"
+    query = f"UPDATE {Table} SET Value = {Value} WHERE Num = {Num} and Date = CAST('{Date}' AS DATE)"
     cursor.execute(query)
 
 def update_db(cursor, df, table):
@@ -67,6 +68,7 @@ def connect_to_db(connection_string: str):
     
     password_encoded = quote(password, safe='')
     
+    # Определяем тип БД на основе driver в строке подключения
     if "PostgreSQL" in driver:
         connection_uri = f"postgresql+psycopg2://{user}:{password_encoded}@{host}:{port if port else 5432}/{database}"
         engine = sa.create_engine(connection_uri, echo=True)
