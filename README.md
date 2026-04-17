@@ -2,7 +2,7 @@
 
 ## Описание
 
-Проект представляет собой ETL-процесс, который загружает и трансформирует данные из системы 1C:ЗиУП в виде Excel-файлов в базу данных MS SQL Server, для дальнейшего построения отчетов на платформе SSRS.
+Проект представляет собой ETL-процесс, который загружает и трансформирует данные из системы 1C:ЗиУП в виде Excel-файлов в базу данных MS SQL Server или PostgreSQL, для дальнейшего построения отчетов.
 
 ## Зависимости
 
@@ -11,8 +11,8 @@
 - pandas
 - openpyxl
 - pyodbc
+- psycopg2
 - sqlalchemy
-- cryptography
 
 ## Настройка
 
@@ -32,14 +32,20 @@
         "ExcelValue1": 1,
         "ExcelValue2": 2
     },
-    "secure_connection_string": "your_encrypted_connection_string_here"
+    "connection_string": "your_connection_string_here",
+    "mail_message": {
+		"from_email": "",
+        "to_emails": [""],
+        "smtp_server": "",
+        "smtp_port": ,
+		"smtp_login": "",
+		"smtp_password": ""
+    }
 }
 ```
-2. Замените значения в file_paths, table_names, table_map и secure_connection_string на соответствующие значения.
+2. Замените значения в file_paths, table_names, table_map, connection_string, mail_message на соответствующие значения.
 
-3. Установите переменную окружения ENCRYPTION_KEY с ключом шифрования для строки подключения к базе данных.
-
-4. Создайте в БД соответствующие таблицы со следующей структурой:
+3. Создайте в БД соответствующие таблицы со следующей структурой:
 
 ```sql
 CREATE TABLE [dbo].[your_first_table_name](
