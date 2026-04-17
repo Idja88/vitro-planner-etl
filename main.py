@@ -51,7 +51,6 @@ def resolve_path(path):
         resolved_path = os.path.abspath(os.path.join(sys._MEIPASS, path))
     else:
         resolved_path = os.path.abspath(os.path.join(os.getcwd(), path))
-
     return resolved_path
 
 def connect_to_db(connection_string: str):
@@ -104,9 +103,9 @@ def send_email(subject, message, from_email, to_emails, smtp_server, smtp_port, 
 
 #MAIN
 def main(connection, cursor, file_paths, table_names, table_map):
-    for (file_path, database_name) in zip(file_paths, table_names):
+    for (file_path, table_name) in zip(file_paths, table_names):
 
-        delete_from_table(connection, cursor, database_name)
+        delete_from_table(connection, cursor, table_name)
 
         sheet_to_df = pd.read_excel(file_path, sheet_name=None)
 
@@ -119,12 +118,14 @@ def main(connection, cursor, file_paths, table_names, table_map):
             df.rename(columns=lambda x: x.replace(' ', ''), inplace=True)
             #Транспонируем значения датафрейма
             df = df.melt(id_vars=["Num"],var_name="Date",value_name="Value")
+            # Преобразуем дату в формат ISO 8601 (YYYY-MM-DD)
+            df["Date"] = pd.to_datetime(df["Date"], format='%d.%m.%Y', errors='coerce').dt.strftime('%Y-%m-%d')
             #Мэппинг значений
             df["Value"] = df["Value"].map(table_map).fillna(0).astype(int)
-            df_to_app = update_db(connection, cursor, df, database_name)
-            append_from_df_to_db(connection, cursor, df_to_app, database_name)
+            df_to_app = update_db(connection, cursor, df, table_name)
+            append_from_df_to_db(connection, cursor, df_to_app, table_name)
 
-        cursor.commit()
+        connection.commit()
 
 if __name__ == "__main__":
     config_path = os.path.join(os.getcwd(), 'config.json')
