@@ -11,7 +11,7 @@ from email.mime.multipart import MIMEMultipart
 
 #Functions
 def delete_from_table(connection, cursor, table):
-    today = date.today()
+    today = date.today().isoformat()
     query = f"DELETE FROM {table} WHERE Date >= CAST('{today}' AS DATE)"
     cursor.execute(query)
     connection.commit()
@@ -36,7 +36,7 @@ def update_db(connection, cursor, df, table):
     return tmp_df
 
 def insert_into_table(cursor, Num, Date, Value, Table):
-    query = f"INSERT INTO {Table} (Num, Date, Value) VALUES('{Num}', '{Date}', '{Value}')"
+    query = f"INSERT INTO {Table} (Num, Date, Value) VALUES('{Num}', CAST('{Date}' AS DATE), '{Value}')"
     cursor.execute(query)
 
 def append_from_df_to_db(connection, cursor, df, Table):
