@@ -1,12 +1,11 @@
 import os
 import sys
 import json
-import urllib
+from urllib.parse import quote
 import pyodbc
+import psycopg2
 import pandas as pd
 import sqlalchemy as sa
-from cryptography.fernet import Fernet
-from datetime import date
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -52,12 +51,33 @@ def resolve_path(path):
 
     return resolved_path
 
-def connect_to_db(secure_connection_string):
-    key = os.environ.get("ENCRYPTION_KEY").encode()
-    cipher_suite = Fernet(key)
-    connection_string = cipher_suite.decrypt(secure_connection_string)
-    connection_uri = f"mssql+pyodbc:///?odbc_connect={urllib.parse.quote_plus(connection_string)}"
-    engine = sa.create_engine(connection_uri, fast_executemany=True, echo=True)
+def connect_to_db(connection_string: str):
+    parts = {}
+    for param in connection_string.split(';'):
+        if '=' in param:
+            key, value = param.split('=', 1)
+            parts[key.strip()] = value.strip().strip('{}')
+    
+    driver = parts.get('Driver') or parts.get('DRIVER')
+    host = parts.get('Server') or parts.get('SERVER')
+    port = parts.get('Port') or parts.get('PORT')
+    database = parts.get('Database') or parts.get('DATABASE')
+    user = parts.get('Uid') or parts.get('UID')
+    password = parts.get('Pwd') or parts.get('PWD')
+    
+    password_encoded = quote(password, safe='')
+    
+    if "PostgreSQL" in driver:
+        connection_uri = f"postgresql+psycopg2://{user}:{password_encoded}@{host}:{port if port else 5432}/{database}"
+        engine = sa.create_engine(connection_uri, echo=True)
+        
+    elif "SQL Server" in driver:
+        connection_uri = f"mssql+pyodbc://{user}:{password_encoded}@{host}:{port if port else 1433}/{database}?driver={quote(driver)}"
+        engine = sa.create_engine(connection_uri, echo=True, fast_executemany=True)
+    
+    else:
+        raise ValueError(f"Unknown database driver: {driver}")
+    
     connection = engine.raw_connection()
     return connection
 
