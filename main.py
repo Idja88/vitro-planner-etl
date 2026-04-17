@@ -2,8 +2,6 @@ import os
 import sys
 import json
 from urllib.parse import quote
-import pyodbc
-import psycopg2
 from datetime import date
 import pandas as pd
 import sqlalchemy as sa
