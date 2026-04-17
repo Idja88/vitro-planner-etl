@@ -13,8 +13,8 @@ from email.mime.multipart import MIMEMultipart
 
 #Functions
 def delete_from_table(cursor, table):
-    date = date.today()
-    query = f"DELETE FROM {table} WHERE Date >= CAST('{date}' AS DATE)"
+    today = date.today()
+    query = f"DELETE FROM {table} WHERE Date >= CAST('{today}' AS DATE)"
     cursor.execute(query)
     cursor.commit()
 
