@@ -147,7 +147,7 @@ if __name__ == "__main__":
         main(cursor, file_paths, table_names, table_map)
     except Exception as e:
         error_message = f"An error occurred: {str(e)}"
-        send_email("Error in ETL process", error_message, from_email, to_emails, smtp_server, smtp_port)
+        send_email("Error in ETL process", error_message, from_email, to_emails, smtp_server, smtp_port, smtp_login, smtp_password)
         raise SystemExit(1)
     finally:
         connection.close()
