@@ -66,6 +66,7 @@ def connect_to_db(connection_string: str):
     password = parts.get('Pwd') or parts.get('PWD')
     
     password_encoded = quote(password, safe='')
+    driver_encoded = quote(driver, safe='')
     
     # Определяем тип БД на основе driver в строке подключения
     if "PostgreSQL" in driver:
@@ -73,7 +74,7 @@ def connect_to_db(connection_string: str):
         engine = sa.create_engine(connection_uri)
         
     elif "SQL Server" in driver:
-        connection_uri = f"mssql+pyodbc://{user}:{password_encoded}@{host}:{port if port else 1433}/{database}?driver={quote(driver)}"
+        connection_uri = f"mssql+pyodbc://{user}:{password_encoded}@{host}:{port if port else 1433}/{database}?driver={driver_encoded}"
         engine = sa.create_engine(connection_uri, fast_executemany=True)
     
     else:
