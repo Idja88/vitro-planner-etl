@@ -130,13 +130,13 @@ if __name__ == "__main__":
         file_paths = config['file_paths']
         table_names = config['table_names']
         table_map = config['table_map']
-        secure_connection_string = config['secure_connection_string']
+        connection_string = config['connection_string']
         from_email = config['mail_message']['from_email']
         to_emails = config['mail_message']['to_emails']
         smtp_server = config['mail_message']['smtp_server']
         smtp_port = config['mail_message']['smtp_port']
 
-    connection = connect_to_db(secure_connection_string)
+    connection = connect_to_db(connection_string)
     cursor = connection.cursor()
 
     try:
