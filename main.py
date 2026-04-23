@@ -10,9 +10,9 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 #Functions
-def delete_from_table(connection, cursor, table):
+def delete_from_table(connection, cursor, Table):
     today = date.today().isoformat()
-    query = f"DELETE FROM {table} WHERE Date >= CAST('{today}' AS DATE)"
+    query = f"DELETE FROM {Table} WHERE Date >= CAST('{today}' AS DATE)"
     cursor.execute(query)
     connection.commit()
 
@@ -26,11 +26,11 @@ def update_row(connection, cursor, Num, Date, Value, Table):
     cursor.execute(query)
     connection.commit()
 
-def update_db(connection, cursor, df, table):
+def update_db(connection, cursor, df, Table):
     tmp_df = pd.DataFrame(columns=['Num', 'Date', 'Value'])
     for i, row in df.iterrows():
-        if check_if_num_exists(cursor, row['Num'], row['Date'], table):
-            update_row(connection, cursor, row['Num'], row['Date'], row['Value'], table)
+        if check_if_num_exists(cursor, row['Num'], row['Date'], Table):
+            update_row(connection, cursor, row['Num'], row['Date'], row['Value'], Table)
         else:
             tmp_df = pd.concat([tmp_df, row.to_frame().T], axis=0, ignore_index=True)      
     return tmp_df
